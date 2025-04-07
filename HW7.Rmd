@@ -1,0 +1,271 @@
+---
+title: "Homework 7"
+output: html_document
+date: "2025-04-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+
+### Part A
+
+```{r part a}
+data <- read.csv("armfold.csv")
+
+
+totalMales = sum(data$Sex == "Male")    
+totalFemales = sum(data$Sex == "Female")  
+
+totalMales
+totalFemales
+
+
+prop_males = mean(data$LonR_fold[data$Sex == "Male"])
+
+
+prop_females = mean(data$LonR_fold[data$Sex == "Female"])
+
+prop_males
+prop_females
+```
+
+**Number of male and female students**:
+
+There are 106 male students and 111 female students in the dataset.
+
+**Sample proportion of males who folded their left arm on top**:
+
+About 47.17% of men
+
+**Sample proportion of females who folded their left arm on top**:
+
+About 42.34% of females
+
+### Part B
+
+```{r part b}
+diff_in_prop <- prop_males - prop_females
+diff_in_prop
+```
+
+The observed difference in proportions between the two groups is about **0.0483.**
+
+### Part C
+
+```{r part c}
+table_data <- table(data$LonR_fold, data$Sex)
+
+table_data
+
+male_LonR = sum(data$LonR_fold[data$Sex == "Male"])
+female_LonR = sum(data$LonR_fold[data$Sex == "Female"])
+
+maleSum = sum(data$Sex == "Male")
+femaleSum = sum(data$Sex == "Female")
+
+prop.test(x=c(male_LonR, female_LonR), n = c(maleSum, femaleSum),
+          correct = FALSE)
+
+
+#By hand code
+n_male <- sum(data$Sex == "Male")
+n_female <- sum(data$Sex == "Female")
+
+p_male <- prop_males
+p_female <- prop_females
+
+diff <- p_male - p_female
+
+SE <- sqrt((p_male * (1 - p_male) / n_male) +
+           (p_female * (1 - p_female) / n_female))
+
+
+z_star <- 1.96
+
+lower <- diff - z_star * SE
+upper <- diff + z_star * SE
+c(lower, upper)
+```
+
+### ![](images/Screenshot 2025-04-06 at 8.12.31 PM.png){width="242"}
+
+**This is the equation for the the standard error for the difference in proportions**
+
+P1 = 0.4717 (males)
+
+P2 = 0.4234 (females)
+
+N1 = 106 (number of males)
+
+N2 = 111 (number of females)
+
+I used the z\* value **1.96**. This is the critical value from the standard normal distribution that captures the middle 95% of the distribution. It corresponds to a two-tailed confidence level of 95%, with 2.5% in each tail.
+					
+
+### Part D
+
+If we were to repeatedly take random samples of students from this university's population and calculate the difference in arm-folding proportions, then we would expect that about 95% of those confidence intervals would contain the true difference in population proportions between males and females who fold their left arm on top.
+
+### Part E
+
+The standard error is 0.0675. This means that the difference in proportions between male and female would typically vary by about 6.75% just due to chance. The standard error means value of the observed difference between the proportions of males and females who fold their left arm on top would vary if we repeatedly took different random samples from the same population of students.
+
+### Part F
+
+The sampling distribution refers to the distribution of the difference in proportions we would see if we took infinite random samples from the same population. In this assignment, it shows how the difference between the proportions of males and females folding their left arm on top varies. The thing that varies is the observed difference in proportions. What stays the same is the true population difference, which we are trying to estimate.
+
+### Part G
+
+The mathematical theorem that justifies a normal distribution to approximate the sampling distribution of the difference in proportions is the Central Limit Theorem. It says that with large enough sample sizes the sampling distribution will turn out approximately normal. Since both groups have enough observations and at least 10 successes and failures, the normal approximation works here.
+
+### Part H
+
+Since the confidence interval (-0.084, 0.180) contains 0, there is no difference in arm folding between the sex of the person
+
+### Part I
+
+Yes there would be a difference in the confidence interval because there would be different people and due to random chance. There will be a natural variation in those intervals. But if we repeat this with many samples, then about 95% of those confidence intervals would contain the true population difference in proportions.
+
+## Problem 2
+
+### Part A
+
+```{r part a}
+dataGov <- read_csv("turnout.csv")
+
+mean(dataGov$voted1998[dataGov$GOTV_call == 1])
+mean(dataGov$voted1998[dataGov$GOTV_call == 0])
+
+prop.test(x = c(sum(dataGov$voted1998[dataGov$GOTV_call == 1]),
+                sum(dataGov$voted1998[dataGov$GOTV_call == 0])),
+          n = c(sum(dataGov$GOTV_call == 1), sum(dataGov$GOTV_call == 0)),
+          correct = FALSE)
+```
+
+This confidence interval suggests that those who received a GOTV call were 14.3 to 26.4 percentage points more likely to vote in 1998 than those who didn’t. Since the entire interval is above 0, this provides strong evidence of a positive association between receiving a GOTV call and voting behavior.
+
+### Part B
+
+```{r}
+dataGov %>%
+  group_by(GOTV_call) %>%
+  summarize(voted1996 = mean(voted1996),
+            AGE = mean(AGE),
+            MAJORPTY = mean(MAJORPTY))
+
+
+
+voted96_gotv <- sum(data$voted1996[data$GOTV_call == 1])
+voted96_nogotv <- sum(data$voted1996[data$GOTV_call == 0])
+n_gotv <- sum(data$GOTV_call == 1)
+n_nogotv <- sum(data$GOTV_call == 0)
+
+prop.test(x = c(voted96_gotv, voted96_nogotv),
+          n = c(n_gotv, n_nogotv),
+          correct = FALSE)
+
+
+
+party_gotv <- sum(data$MAJORPTY[data$GOTV_call == 1])
+party_nogotv <- sum(data$MAJORPTY[data$GOTV_call == 0])
+
+prop.test(x = c(party_gotv, party_nogotv),
+          n = c(n_gotv, n_nogotv),
+          correct = FALSE)
+
+
+
+t.test(AGE ~ GOTV_call, data = data)
+```
+
+Since all three of these intervals do not contain 0, we can say with 95% certainty that there is a difference in the sample proportions and all these variables are confounding variables.
+
+## Part C
+
+```{r}
+install.packages("MatchIt")
+library(MatchIt)
+
+match_model <- matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY, data = dataGov, method = "nearest", ratio = 5)
+matched_data <- match.data(match_model)
+
+matched_data %>%
+  group_by(GOTV_call) %>%
+  summarize(voted1996 = mean(voted1996),
+            AGE = mean(AGE),
+            MAJORPTY = mean(MAJORPTY))
+
+
+voted96_gotv <- sum(matched_data$voted1996[matched_data$GOTV_call == 1])
+voted96_nogotv <- sum(matched_data$voted1996[matched_data$GOTV_call == 0])
+
+n_gotv <- sum(matched_data$GOTV_call == 1)
+n_nogotv <- sum(matched_data$GOTV_call == 0)
+
+prop.test(x = c(voted96_gotv, voted96_nogotv),
+          n = c(n_gotv, n_nogotv),
+          correct = FALSE)
+
+#MAJORPTY
+
+party_gotv <- sum(matched_data$MAJORPTY[matched_data$GOTV_call == 1])
+party_nogotv <- sum(matched_data$MAJORPTY[matched_data$GOTV_call == 0])
+
+prop.test(x = c(party_gotv, party_nogotv),
+          n = c(n_gotv, n_nogotv),
+          correct = FALSE)
+
+
+
+#AGE
+t.test(AGE ~ GOTV_call, data = matched_data)
+
+
+```
+
+Because all 3 of these confidence intervals include 0 we can say with 95% certainty that the matching
+successfully balanced the groups on those confounders.
+
+```{r}
+p_gotv_matched <- mean(matched_data$voted1998[matched_data$GOTV_call == 1])
+p_nogotv_matched <- mean(matched_data$voted1998[matched_data$GOTV_call == 0])
+
+
+voted_gotv <- sum(matched_data$voted1998[matched_data$GOTV_call == 1])
+voted_nogotv <- sum(matched_data$voted1998[matched_data$GOTV_call == 0])
+n_gotv <- sum(matched_data$GOTV_call == 1)
+n_nogotv <- sum(matched_data$GOTV_call == 0)
+
+# Use prop.test() to calculate the 95% confidence interval
+prop.test(x = c(voted_gotv, voted_nogotv),
+          n = c(n_gotv, n_nogotv),
+          correct = FALSE)
+```
+
+We can see that
+
+				
+
+			
+
+		
+
+	
+
+			
+
+		
+
+	
+\
+
+				
+
+			
+
+		
+
+	
